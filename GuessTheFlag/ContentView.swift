@@ -101,11 +101,12 @@ struct ContentView: View {
             }
             showingScoreAlert = true
         } else {
-            showingEndAlert = true
-            gameProcess = 0
-            if score <= 0 {
+            if score < 0 {
                 scoreTrigger = true
             }
+            showingEndAlert = true
+            gameProcess = 0
+            
         }
     }
 
