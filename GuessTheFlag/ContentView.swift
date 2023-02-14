@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var correctAnswer = Int.random(in: 0...2)
     @State private var catchFlag = 0
     @State private var scoreTrigger = false
+    @State private var isOpacity = false
     @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
 
     var body: some View {
@@ -52,6 +53,7 @@ struct ContentView: View {
                                 .renderingMode(.original)
                                 .cornerRadius(20)
                                 .shadow(radius: 10)
+                                .opacity(isOpacity && catchFlag != number ? 0.25 : 1)
                         })
                     }
                 }
@@ -94,12 +96,16 @@ struct ContentView: View {
                 scoreTitle = "Correct"
                 score += 100
                 gameProcess -= 1
+                isOpacity = true
             } else {
                 scoreTitle = "Wrong!"
                 score -= 100
                 gameProcess -= 1
+                isOpacity = true
             }
-            showingScoreAlert = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                showingScoreAlert = true
+            }
         } else {
             if score < 0 {
                 scoreTrigger = true
@@ -114,6 +120,7 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        isOpacity = false
     }
     
     // Method for alert at the end of the game
