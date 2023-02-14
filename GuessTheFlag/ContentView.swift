@@ -94,12 +94,16 @@ struct ContentView: View {
         if gameProcess > 1 {
             if number == correctAnswer {
                 scoreTitle = "Correct"
-                score += 100
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    score += 100
+                }
                 gameProcess -= 1
                 isOpacity = true
             } else {
                 scoreTitle = "Wrong!"
-                score -= 100
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    score -= 100
+                }
                 gameProcess -= 1
                 isOpacity = true
             }
