@@ -4,31 +4,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var showingScoreAlert = false
-    @State private var showingEndAlert = false
-    @State private var gameProcess = 10
-    @State private var scoreTitle = ""
-    @State private var score = 0
-    @State private var correctAnswer = Int.random(in: 0...2)
-    @State private var catchFlag = 0
-    @State private var scoreTrigger = false
-    @State private var isOpacity = false
-    @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
+    @StateObject private var viewModel = ViewModel()
     
-    let labels = [
-    "Estonia": "Flag with three horizontal stripes of equal size. Top stripe blue, middle stripe black, bottom stripe white",
-    "France": "Flag with three vertical stripes of equal size. Left stripe blue, middle stripe white, right stripe red",
-    "Germany": "Flag with three horizontal stripes of equal size. Top stripe black, middle stripe red, bottom stripe gold",
-    "Ireland": "Flag with three vertical stripes of equal size. Left stripe green, middle stripe white, right stripe orange",
-    "Italy": "Flag with three vertical stripes of equal size. Left stripe green, middle stripe white, right stripe red",
-    "Nigeria": "Flag with three vertical stripes of equal size. Left stripe green, middle stripe white, right stripe green",
-    "Poland": "Flag with two horizontal stripes of equal size. Top stripe white, bottom stripe red",
-    "Russia": "Flag with three horizontal stripes of equal size. Top stripe white, middle stripe blue, bottom stripe red",
-    "Spain": "Flag with three horizontal stripes. Top thin stripe red, middle thick stripe gold with a crest on the left, bottom thin stripe red",
-    "UK": "Flag with overlapping red and white crosses, both straight and diagonally, on a blue background",
-    "US": "Flag with red and white stripes of equal size, with white stars on a blue background in the top-left corner"
-    ]
-
     var body: some View {
         ZStack {
             
@@ -53,7 +30,7 @@ struct ContentView: View {
                         Text("Tap the flag of")
                             .foregroundStyle(.secondary)
                             .font(.subheadline.weight(.heavy))
-                        Text(countries[correctAnswer])
+                        Text(viewModel.countries[viewModel.correctAnswer])
                             .font(.largeTitle.weight(.semibold))
                     }
                     .padding()
@@ -61,14 +38,14 @@ struct ContentView: View {
                     // Performing loop of flags
                     ForEach(0..<3) { number in
                         Button(action: {
-                            flagTapped(number)
+                            viewModel.flagTapped(number)
                         }, label: {
-                            Image(countries[number])
+                            Image(viewModel.countries[number])
                                 .renderingMode(.original)
                                 .cornerRadius(20)
                                 .shadow(radius: 10)
-                                .opacity(isOpacity && catchFlag != number ? 0.25 : 1)
-                                .accessibilityLabel(labels[countries[number], default: "Unknown flag"])
+                                .opacity(viewModel.isOpacity && viewModel.catchFlag != number ? 0.25 : 1)
+                                .accessibilityLabel(viewModel.labels[viewModel.countries[number], default: "Unknown flag"])
                         })
                     }
                 }
@@ -80,74 +57,27 @@ struct ContentView: View {
                 Spacer()
                 
                 // Bottom score information
-                Text("Score: \(score)")
+                Text("Score: \(viewModel.score)")
                     .foregroundColor(.white)
                     .font(.title.bold())
                 Spacer()
-                Text("\(gameProcess) tries left")
+                Text("\(viewModel.gameProcess) tries left")
                     .foregroundStyle(.secondary)
             }
             .padding()
         }
         
         // Performing Alerts
-        .alert(scoreTitle, isPresented: $showingScoreAlert) {
-            Button("Continue", action: askQuestion)
+        .alert(viewModel.scoreTitle, isPresented: $viewModel.showingScoreAlert) {
+            Button("Continue", action: viewModel.askQuestion)
         } message: {
-            Text("That’s the flag of \(countries[catchFlag])")
+            Text("That’s the flag of \(viewModel.countries[viewModel.catchFlag])")
         }
-        .alert(scoreTrigger ? "Oops your score is negative 😢 try again": "Congratulation 🥳", isPresented: $showingEndAlert) {
-            Button("Restart", action: restartGame)
+        .alert(viewModel.scoreTrigger ? "Oops your score is negative 😢 try again": "Congratulation 🥳", isPresented: $viewModel.showingEndAlert) {
+            Button("Restart", action: viewModel.restartGame)
         } message: {
-            Text("You finished and your score is \(score)")
+            Text("You finished and your score is \(viewModel.score)")
         }
-    }
-
-    // Define was the answer correct or not + triggering alrets
-    func flagTapped(_ number: Int) {
-        catchFlag = number
-        if gameProcess > 1 {
-            if number == correctAnswer {
-                scoreTitle = "Correct"
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    score += 100
-                }
-                gameProcess -= 1
-                isOpacity = true
-            } else {
-                scoreTitle = "Wrong!"
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    score -= 100
-                }
-                gameProcess -= 1
-                isOpacity = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                showingScoreAlert = true
-            }
-        } else {
-            if score < 0 {
-                scoreTrigger = true
-            }
-            showingEndAlert = true
-            gameProcess = 0
-            
-        }
-    }
-
-    // Method for alert during the game
-    func askQuestion() {
-        countries.shuffle()
-        correctAnswer = Int.random(in: 0...2)
-        isOpacity = false
-    }
-    
-    // Method for alert at the end of the game
-    func restartGame() {
-        countries.shuffle()
-        correctAnswer = Int.random(in: 0...2)
-        gameProcess = 10
-        score = 0
     }
 }
 
