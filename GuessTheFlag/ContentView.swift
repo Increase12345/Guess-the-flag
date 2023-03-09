@@ -69,12 +69,20 @@ struct ContentView: View {
         
         // Performing Alerts
         .alert(viewModel.scoreTitle, isPresented: $viewModel.showingScoreAlert) {
-            Button("Continue", action: viewModel.askQuestion)
+            Button("Continue") {
+                Task { @MainActor in
+                    viewModel.askQuestion
+                }
+            }
         } message: {
             Text("That’s the flag of \(viewModel.countries[viewModel.catchFlag])")
         }
         .alert(viewModel.scoreTrigger ? "Oops your score is negative 😢 try again": "Congratulation 🥳", isPresented: $viewModel.showingEndAlert) {
-            Button("Restart", action: viewModel.restartGame)
+            Button("Restart") {
+                Task { @MainActor in
+                    viewModel.restartGame
+                }
+            }
         } message: {
             Text("You finished and your score is \(viewModel.score)")
         }
